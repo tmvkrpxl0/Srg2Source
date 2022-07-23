@@ -76,11 +76,11 @@ public class ZipInputSupplier implements InputSupplier {
     }
 
     @Override
-    public List<String> gatherAll(String endFilter) {
+    public List<String> gatherAll(List<String> endFilter) {
         LinkedList<String> out = new LinkedList<String>();
 
         for (String key : data.keySet())
-            if (key.endsWith(endFilter))
+            if (endFilter.stream().anyMatch(key::endsWith))
                 out.add(key);
 
         return out;

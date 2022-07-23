@@ -28,15 +28,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import net.minecraftforge.srg2source.api.InputSupplier;
+import net.minecraftforge.srg2source.api.LanguageType;
 import net.minecraftforge.srg2source.api.SourceVersion;
 import net.minecraftforge.srg2source.range.RangeMap;
 import net.minecraftforge.srg2source.range.RangeMapBuilder;
@@ -133,7 +129,9 @@ public class RangeExtractor extends ConfLogger<RangeExtractor> {
     public boolean run() {
         log("Symbol range map extraction starting");
 
-        String[] files = input.gatherAll(".java").stream()
+        List<String> fileExtensions = Arrays.stream(LanguageType.values()).map(LanguageType::getFileExtension).collect(Collectors.toList());
+
+        String[] files = input.gatherAll(fileExtensions).stream()
                 .map(f -> f.replaceAll("\\\\", "/")) // Normalize directory separators.
                 .sorted()
                 .toArray(String[]::new);

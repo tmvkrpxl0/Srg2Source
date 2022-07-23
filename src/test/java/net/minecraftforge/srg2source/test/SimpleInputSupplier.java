@@ -51,7 +51,7 @@ public class SimpleInputSupplier implements InputSupplier {
     }
 
     @Override
-    public List<String> gatherAll(String endFilter)
+    public List<String> gatherAll(List<String> endFilter)
     {
         return Arrays.asList("/" + clsName.replace('.', '/') + ".java");
     }

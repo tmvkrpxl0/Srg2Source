@@ -35,13 +35,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import net.minecraftforge.srg2source.api.LanguageType;
 import org.junit.Assert;
 
 import com.google.common.jimfs.Configuration;
@@ -186,11 +184,11 @@ public abstract class SimpleTestBase {
     }
 
     private void compareDirs(Path expected, Path actual) throws IOException {
-        Set<String> lstExpected = Files.walk(expected).filter(Files::isRegularFile).map(p -> expected.relativize(p).toString().replace('\\', '/').replace(".txt", ".java")).collect(Collectors.toSet());
+        Set<String> lstExpected = Files.walk(expected).filter(Files::isRegularFile).map(p -> expected.relativize(p).toString().replace('\\', '/').replace(".txt", "")).collect(Collectors.toSet());
         Set<String> lstActual = Files.walk(actual).filter(Files::isRegularFile).map(p -> actual.relativize(p).toString().replace('\\', '/')).collect(Collectors.toSet());
         Assert.assertEquals("File listing differ", lstExpected, lstActual);
         Files.walk(actual).filter(Files::isRegularFile).forEach(p -> {
-            String relative = actual.relativize(p).toString().replace(".java", ".txt");
+            String relative = actual.relativize(p) + ".txt";
             Assert.assertEquals("Files differ: " + relative, getFileContents(expected.resolve(relative)), getFileContents(p));
         });
     }
@@ -216,17 +214,24 @@ public abstract class SimpleTestBase {
 
         @Override
         public InputStream getInput(String path) {
-            if (path.endsWith(".java"))
-                return super.getInput(path.substring(0, path.length() - 4) + "txt");
-            return super.getInput(path);
+            if (LanguageType.isSourceFile(path)) {
+                return super.getInput(path + ".txt");
+            } else {
+                return super.getInput(path);
+            }
         }
 
         @Override
-        public List<String> gatherAll(String endFilter) {
-            if (!".java".equals(endFilter))
-                return super.gatherAll(endFilter);
+        public List<String> gatherAll(List<String> endFilter) {
+            List<String> testFilter = endFilter.stream().map(filter -> {
+                if (LanguageType.isSourceFile(filter)) {
+                    return filter + ".txt";
+                } else {
+                    return filter;
+                }
+            }).collect(Collectors.toList());
 
-            return super.gatherAll(".txt").stream().map(f -> f.substring(0, f.length() - 4) + ".java").collect(Collectors.toList());
+            return super.gatherAll(testFilter).stream().map(f -> f.substring(0, f.length()-4)).collect(Collectors.toList());
         }
     }
 

@@ -58,7 +58,7 @@ public class ChainedInputSupplier implements InputSupplier {
     }
 
     @Override
-    public List<String> gatherAll(String endFilter) {
+    public List<String> gatherAll(List<String> endFilter) {
         return children.stream().flatMap(c -> c.gatherAll(endFilter).stream()).distinct().collect(Collectors.toList());
     }
 

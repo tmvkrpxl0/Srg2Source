@@ -46,12 +46,12 @@ public interface InputSupplier extends Closeable {
     InputStream getInput(String relPath);
 
     /**
-     * Gathers all the names of all the resources with the given ending in their name.
+     * Gathers all the names of all the resources with the given endings in their name.
      * These paths are guaranteed to be relative. This will never return null, and return an empty list instead.
-     * @param endFilter Filter to match the end of files names
+     * @param endFilter Filters to match the end of files names
      * @return A list containing all files matching the filter
      */
-    List<String> gatherAll(String endFilter);
+    List<String> gatherAll(List<String> endFilter);
 
     /**
      * Get the encoding to be used when processing this specified resource as code.

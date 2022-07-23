@@ -33,10 +33,6 @@ repositories {
         name = "forge"
         url = "https://maven.minecraftforge.net/"
     }
-    maven {
-        name = "eclipse"
-        url = "https://repo.eclipse.org/content/groups/eclipse"
-    }
     mavenCentral()
 }
 

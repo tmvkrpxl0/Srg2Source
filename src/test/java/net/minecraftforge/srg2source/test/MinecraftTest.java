@@ -37,11 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -77,8 +73,8 @@ public class MinecraftTest {
     //Run the command: gradlew [MC_VERSION]:projectJoinedApplyPatches
     //It will make all necessary files for this test.
 
-    private static final Path MCP_ROOT = Paths.get("Z:/Projects/MCP/MCPConfig/");
-    private static final String MC_VERSION = "1.16.2";
+    private static final Path MCP_ROOT = Paths.get("/home/tmvkrpxl0/MCPConfig/");
+    private static final String MC_VERSION = "1.19";
     private static final OutputStream NULL_OUTPUT = new OutputStream() { public void write(int b) throws IOException { } };
 
     /**
@@ -104,9 +100,9 @@ public class MinecraftTest {
 
         Class<?> cls = Class.forName(getClass().getName() + "$Redefined", true, tcl);
 
-        long legacy  = (Long)cls.getDeclaredMethod("extract", boolean.class).invoke(cls.getConstructor(String.class).newInstance(MC_VERSION), true);
-        long batched = (Long)cls.getDeclaredMethod("extract", boolean.class).invoke(cls.getConstructor(String.class).newInstance(MC_VERSION), false);
-        long apply   = (Long)cls.getDeclaredMethod("apply")                 .invoke(cls.getConstructor(String.class).newInstance(MC_VERSION));
+        long legacy  = new Redefined(MC_VERSION).extract(true);
+        long batched = new Redefined(MC_VERSION).extract(false);
+        long apply   = new Redefined(MC_VERSION).apply();
 
         System.out.println("Legacy  Time: " + legacy);
         System.out.println("Batched Time: " + batched);
@@ -196,7 +192,7 @@ public class MinecraftTest {
 
                 try (ZipInputSupplier clean = ZipInputSupplier.create(src_mcp , StandardCharsets.UTF_8);
                      ZipInputSupplier zout = ZipInputSupplier.create(root.resolve("apply_output.jar"), StandardCharsets.UTF_8)) {
-                    for (String path : clean.gatherAll(".java")) {
+                    for (String path : clean.gatherAll(Collections.singletonList(".java"))) {
                         String c = new String(Util.readStream(clean.getInput(path)), StandardCharsets.UTF_8);
                         String o = new String(Util.readStream(clean.getInput(path)), StandardCharsets.UTF_8);
                         Assert.assertEquals("Output Mismatch: " + path, c, o);
@@ -214,8 +210,8 @@ public class MinecraftTest {
 
             Map<String, String> env = new HashMap<>();
             env.put("create", "true");
-            URI uri = URI.create("jar:file:/" + target.toAbsolutePath().toString().replace('\\', '/'));
-            System.out.println("jar:file:/" + target.toAbsolutePath().toString().replace('\\', '/'));
+            URI uri = URI.create("jar:file://" + target.toAbsolutePath().toString().replace('\\', '/'));
+            System.out.println("jar:file://" + target.toAbsolutePath().toString().replace('\\', '/'));
             Path src = mcpData("projects/joined/src/main/java");
             try (FileSystem zipfs = FileSystems.newFileSystem(uri, env);
                 Stream<Path> stream = Files.walk(src)) {
@@ -243,6 +239,7 @@ public class MinecraftTest {
         //So, currently there is no real way to identify lambda arguments... so we need to figure that out.
         //For the time being we need to figure out how to NOT remap lambda arguments so the test will pass..
         private String makeName(String srg) {
+            if (true) return srg;
             String[] pts = srg.split("_");
             if ("func".equals(pts[0]))
                 return "m_" + pts[1] + '_';

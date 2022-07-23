@@ -83,11 +83,11 @@ public class FolderSupplier implements InputSupplier, OutputSupplier {
     }
 
     @Override
-    public List<String> gatherAll(String endFilter) {
+    public List<String> gatherAll(List<String> endFilter) {
         try {
             return Files.walk(root).filter(Files::isRegularFile)
                     .map(root::relativize).map(Path::toString)
-                    .filter(p -> p.endsWith(endFilter))
+                    .filter(p -> endFilter.stream().anyMatch(p::endsWith))
                     .sorted().collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
